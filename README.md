@@ -2,15 +2,24 @@
 
 Collection of simple standalone web applications hosted on GitHub Pages.
 
-The goal of this repo is to develop simple deployable apps to solve specific use cases as a practice to focus on solving problems quickly.
+The goal of this repo is to develop simple deployable apps to solve specific use cases as a practice to focus on solving problems quickly with AI coding assistants like Augment.
+
 
 ## Available Apps
 
-- [LLMArena Text Area Scores](https://kimnewzealand.github.io/apps/models-app.html) - Interactive visualization of large language model scores with bar charts to visualise the difference between proprietary and open source models, which is not visually available in the [LLMArena leaderboard](https://lmarena.ai/leaderboard).
+- [LLM Text Arena Scores and Votes](https://kimnewzealand.github.io/apps/models-app.html) 
 
-## About
+"What are my best open source text LLM options at each performance level?" 
 
-This repository hosts multiple standalone web applications, each designed to run independently without shared dependencies. Each app is a single HTML file that includes all necessary CSS and JavaScript inline or loads dependencies from CDNs.
+This app visualises the model capabilities (the Arena score) and public opinion (number of votes) differences between proprietary and open source text models and whether they are available for download from Ollama, which is not visually available in the [LLMArena leaderboard](https://lmarena.ai/leaderboard). 
+
+What is Arena Score:
+- Battle-Based Evaluation
+- Head-to-head battles: Two models compete by generating responses to the same prompt
+- Human judges: Real users vote on which response is better
+- Elo-style rating: Similar to chess ratings, models gain/lose points based on wins/losses
+- Composite metric: Reflects overall model performance across diverse tasks
+
 
 ## App Architecture
 

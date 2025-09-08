@@ -1,0 +1,22 @@
+model_name,command
+Qwen2.5-72B-Instruct,ollama pull qwen2.5:72b-instruct
+Qwen2.5-32B-Instruct,ollama pull qwen2.5:32b-instruct
+Qwen2.5-14B-Instruct,ollama pull qwen2.5:14b-instruct
+Qwen2.5-7B-Instruct,ollama pull qwen2.5:7b-instruct
+Qwen1.5-72B-Chat,ollama pull qwen:72b
+Qwen1.5-32B-Chat,ollama pull qwen:32b
+Qwen1.5-14B-Chat,ollama pull qwen:14b
+Mixtral-8x22B-Instruct,ollama pull mixtral:8x22b-instruct
+Mixtral-8x7B-Instruct,ollama pull mixtral:8x7b-instruct
+Llama-3.1-70B-Instruct,ollama pull llama3.1:70b-instruct
+Llama-3.1-8B-Instruct,ollama pull llama3.1:8b-instruct
+Llama-3-70B-Instruct,ollama pull llama3:70b-instruct
+Llama-3-8B-Instruct,ollama pull llama3:8b-instruct
+Gemma-2-27B-it,ollama pull gemma2:27b
+Gemma-2-9B-it,ollama pull gemma2:9b
+Gemma-2-2B-it,ollama pull gemma2:2b
+Phi-3-Medium-4k-Instruct,ollama pull phi3:medium
+Phi-3-Mini-128k-Instruct,ollama pull phi3:mini
+Mistral-7B-Instruct,ollama pull mistral:7b-instruct
+CodeLlama-70B-Instruct,ollama pull codellama:70b-instruct
+CodeLlama-34B-Instruct,ollama pull codellama:34b-instruct
