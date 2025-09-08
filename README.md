@@ -7,9 +7,7 @@ The goal of this repo is to develop simple deployable apps to solve specific use
 
 ## Available Apps
 
-- [LLM Text Arena Scores and Votes](https://kimnewzealand.github.io/apps/models-app.html) 
-
-"What are my best open source text LLM options at each performance level?" 
+- [Top Text LLMs - Arena Score vs Voting Score - Discover non-proprietary models in Ollama](https://kimnewzealand.github.io/apps/models-app.html) 
 
 This app visualises the model capabilities (the Arena score) and public opinion (number of votes) differences between proprietary and open source text models and whether they are available for download from Ollama, which is not visually available in the [LLMArena leaderboard](https://lmarena.ai/leaderboard). 
 
