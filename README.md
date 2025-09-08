@@ -1,8 +1,6 @@
 # Apps Repository
 
-Collection of simple standalone web applications hosted on GitHub Pages.
-
-The goal of this repo is to develop simple deployable apps to solve specific use cases as a practice to focus on solving problems quickly with AI coding assistants like Augment.
+This repo contains simple, deployable apps that solve specific problems quickly using AI coding assistants, like Augment.
 
 
 ## App Architecture
