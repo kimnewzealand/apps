@@ -16,14 +16,11 @@ Each application follows these principles:
 
 - [Top Text LLMs - Arena Score vs Voting Score - Discover non-proprietary models in Ollama](https://kimnewzealand.github.io/apps/models-app.html) 
 
-This app visualises the model capabilities (the Arena score) and public opinion (number of votes) differences between proprietary and open source text models and whether they are available for download from Ollama, which is not visually available in the [LLMArena leaderboard](https://lmarena.ai/leaderboard). 
+I wanted to find a quick way to chose the best free to use Ollama model to download and experiment with. This app visualises the model capabilities (the Arena score) and public opinion (number of votes) based on the [LLMArena leaderboard](https://lmarena.ai/leaderboard), breaks down proprietary and open source text models and whether they are available for download from Ollama, and which ones are 7B or smaller given my 8GB installed RAM.
 
-What is the Arena Score:
-- Battle-Based Evaluation
-- Head-to-head battles: Two models compete by generating responses to the same prompt
-- Human judges: Real users vote on which response is better
-- Elo-style rating: Similar to chess ratings, models gain/lose points based on wins/losses
-- Composite metric: Reflects overall model performance across diverse tasks
+As per [Ollama's docs:](https://github.com/ollama/ollama?tab=readme-ov-file)
+> You should have at least 8 GB of RAM available to run the 7B models, 16 GB to run the 13B models, and 32 GB to run the 33B models.
+
 
 ## Adding New Apps
 

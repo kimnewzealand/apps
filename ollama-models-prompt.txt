@@ -1,0 +1,65 @@
+# Ollama Model Library to CSV Conversion
+
+## TASK
+Extract all models from https://ollama.com/search and convert to structured CSV format in ollama-models.csv.
+Do not use your own knowledge about the models, only use the information available on the website.
+
+## INSTRUCTIONS
+1. Visit the Ollama library website
+2. Extract information for each model listed
+3. Create one CSV row per model variant (different sizes)
+4. Use the exact CSV format specified below
+
+## CSV FORMAT
+```
+model_group,model_name,model_cli,description,categories,size,pulls,tags_count,last_updated
+```
+
+## FIELD DEFINITIONS
+- **model_group**: Base model family name (e.g., "llama", "qwen", "phi")
+- **model_name**: Full display name that will be used to match names in LMArena. The names are created by splitting the Ollama model name and concatenating the size For example llama3.1 is split into "llama", "3.1", and "70B" to create "Llama-3.1-70B". The exception are qwen models where we concatenate "qwen2.5" and "72B" to create eg "Qwen2.5-72B" .
+- **model_cli**: Exact name for cli commands including pull(e.g., "llama3.1:8b", "qwen2.5:72b", "phi-4")
+- **description**: Model description from the website
+- **categories**: Comma-separated list in brackets (e.g., "[chat,instruct]")
+- **size**: Parameter count (e.g., "8B", "70B")
+- **pulls**: Download count in millions (e.g., "2.1M")
+- **tags_count**: Number of available tags/variants
+- **last_updated**: Time since last update (e.g., "4_weeks_ago")
+
+## EXAMPLE INPUT
+```
+llama3.1
+Meta's latest large language model with improved reasoning capabilities.
+chat, instruct
+8B, 70B
+5.2M Pulls
+2 Tags
+Updated 2 weeks ago
+```
+
+## EXAMPLE OUTPUT
+```
+llama3.1,llama-3.1-8B,llama3.1:8b,"Meta's latest large language model with improved reasoning capabilities","[chat,instruct]",8B,5.2M,2,2_weeks_ago
+llama3.1,llama-3.1-70B,llama3.1:70b,"Meta's latest large language model with improved reasoning capabilities","[chat,instruct]",70B,5.2M,2,2_weeks_ago
+```
+
+## DATA PROCESSING RULES
+1. **Multiple sizes**: Create separate rows for each size variant
+2. **Descriptions**: Wrap in quotes if they contain commas
+3. **Categories**: Format as bracketed list: "[category1,category2]". The categories can be empty.
+4. **Updates**: Convert "2 weeks ago" to "2_weeks_ago"
+5. **Missing data**: Use empty string ""
+
+## OUTPUT REQUIREMENTS
+- Include CSV header row
+- One row per model size variant
+- Consistent formatting across all entries
+- Include all models from the library page
+- Sort by model_group alphabetically
+
+## QUALITY CHECKS
+- Do not update the model_name to match the LMArena names
+- Verify all model_tag values are valid Ollama pull commands
+- Ensure no duplicate rows
+- Categories can be empty. Check that tinyllama models are included with empty categories
+- Validate CSV syntax (proper escaping, no malformed rows)

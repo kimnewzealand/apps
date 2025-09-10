@@ -86,6 +86,96 @@
             border: 1px solid #ddd;
         }
 
+        .ollama-table {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .ollama-table h3 {
+            margin: 0 0 12px 0;
+            font-size: 16px;
+            color: #2c3e50;
+            text-align: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-weight: 300;
+            letter-spacing: -0.5px;
+        }
+
+        .ollama-table table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .ollama-table th {
+            background-color: #34495e;
+            color: white;
+            padding: 8px 6px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .ollama-table td {
+            padding: 6px 6px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 11px;
+            color: #2c3e50;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .ollama-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .ollama-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .ollama-table tr:hover {
+            background-color: #e8f4f8;
+        }
+
+        .ollama-table .size-cell {
+            font-weight: 600;
+            color: #2c3e50;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+
+        .ollama-table .pulls-cell {
+            text-align: right;
+            font-weight: 600;
+            color: #27ae60;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 11px;
+        }
+
+        .ollama-table .categories-cell {
+            font-size: 10px;
+            color: #666;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .size-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+            min-width: 35px;
+        }
+
         .y-axis text {
             font-size: 11px;
             font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
@@ -190,8 +280,28 @@
                 </div>
             </div>
             <div style="text-align: center; margin-top: 10px; font-size: 12px; color: #666; font-style: italic;">
-                * Available in Ollama (subtle highlight)
+                * Available in Ollama (yellow highlight) | 📦 Small Ollama Models 8B and smaller (yellow highlight)
             </div>
+        </div>
+
+        <div class="ollama-table">
+            <h3>Small Ollama Models (8B and smaller)</h3>
+            <p style="font-size: 12px; color: #666; margin: 5px 0; font-style: italic;">
+                📊 <span style="background-color: #fff9c4; padding: 1px 3px; border-radius: 2px;">Yellow highlighted models</span> are confirmed matches in the Arena Score chart above
+            </p>
+            <table id="ollama-models-table">
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Size</th>
+                        <th>Pulls</th>
+                        <th>Categories</th>
+                    </tr>
+                </thead>
+                <tbody id="ollama-models-tbody">
+                    <!-- Table rows will be populated by JavaScript -->
+                </tbody>
+            </table>
         </div>
 
        
@@ -313,10 +423,11 @@
                     .tickFormat("")
                 );
 
-            // Add subtle background rectangles for Ollama models
+            // Add subtle background rectangles for Ollama models (including small Ollama models)
+            const smallOllamaModels = Object.values(ollamaToArenaMapping);
             yAxis.selectAll(".ollama-bg").remove(); // Remove existing backgrounds
             yAxis.selectAll(".ollama-bg")
-                .data(paddedData.map((d, i) => ({...d, index: i})).filter(d => d.isInOllama))
+                .data(paddedData.map((d, i) => ({...d, index: i})).filter(d => d.isInOllama || smallOllamaModels.includes(d.model)))
                 .enter()
                 .append("rect")
                 .attr("class", "ollama-bg")
@@ -331,12 +442,14 @@
                 .attr("ry", 2)
                 .attr("opacity", 0.8);
 
+
+
             // Color the y-axis text based on license and Ollama availability
             yAxis.selectAll(".tick text")
                 .attr("fill", (d, i) => {
                     if (!paddedData[i]) return "#000";
 
-                    // Black text for Ollama models (on yellow background)
+                    // Black text for all Ollama models (on yellow background)
                     if (paddedData[i].isInOllama) {
                         return "#000";
                     }
@@ -417,6 +530,161 @@
             }
         }
 
+        // Function to load ollama models for the table (8B and smaller)
+        async function loadOllamaModelsForTable() {
+            try {
+                const response = await fetch('ollama-models.csv');
+                const csvText = await response.text();
+                const lines = csvText.trim().split('\n');
+                const models = [];
+
+                // Skip header and parse each line
+                lines.slice(1).forEach(line => {
+                    // Parse CSV line with proper handling of quoted fields
+                    const fields = [];
+                    let current = '';
+                    let inQuotes = false;
+
+                    for (let i = 0; i < line.length; i++) {
+                        const char = line[i];
+                        if (char === '"') {
+                            inQuotes = !inQuotes;
+                        } else if (char === ',' && !inQuotes) {
+                            fields.push(current.trim());
+                            current = '';
+                        } else {
+                            current += char;
+                        }
+                    }
+                    fields.push(current.trim()); // Add the last field
+
+                    if (fields.length >= 6) {
+                        const modelName = fields[1]; // model_name field
+                        const size = fields[5]; // size field
+
+                        if (modelName && size && isSmallModel(size)) {
+                            models.push({
+                                name: modelName,
+                                size: size
+                            });
+                        }
+                    }
+                });
+
+                return models;
+            } catch (error) {
+                console.error('Error loading Ollama models for table:', error);
+                return [];
+            }
+        }
+
+        // Function to check if a model size is 8B or smaller
+        function isSmallModel(size) {
+            if (!size) return false;
+
+            const sizeStr = size.toLowerCase();
+
+            // Handle different size formats
+            if (sizeStr.includes('m')) {
+                // Megabyte models (like 135M, 360M) - these are smaller than 1B
+                return true;
+            }
+
+            if (sizeStr.includes('b')) {
+                // Extract number before 'b'
+                const match = sizeStr.match(/(\d+(?:\.\d+)?)b/);
+                if (match) {
+                    const num = parseFloat(match[1]);
+                    return num <= 8;
+                }
+            }
+
+            // Handle special cases like "8x7b" (mixture of experts)
+            if (sizeStr.includes('x')) {
+                const parts = sizeStr.split('x');
+                if (parts.length === 2) {
+                    const secondPart = parts[1].toLowerCase();
+                    if (secondPart.includes('b')) {
+                        const match = secondPart.match(/(\d+(?:\.\d+)?)b/);
+                        if (match) {
+                            const num = parseFloat(match[1]);
+                            return num <= 8;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        // Function to populate the Ollama models table
+        function populateOllamaTable(models) {
+            const tbody = document.getElementById('ollama-models-tbody');
+            if (!tbody) return;
+
+            // Sort models: first by size (largest to smallest), then alphabetically by name
+            models.sort((a, b) => {
+                const sizeA = getSortableSize(a.size);
+                const sizeB = getSortableSize(b.size);
+
+                if (sizeA !== sizeB) {
+                    return sizeB - sizeA;
+                }
+
+                return a.name.localeCompare(b.name);
+            });
+
+            // Clear existing rows
+            tbody.innerHTML = '';
+
+            // Add rows
+            models.forEach(model => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${model.name}</td>
+                    <td><span class="size-badge">${model.size}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Function to convert size to sortable number
+        function getSortableSize(size) {
+            if (!size) return 0;
+
+            const sizeStr = size.toLowerCase();
+
+            if (sizeStr.includes('m')) {
+                const match = sizeStr.match(/(\d+(?:\.\d+)?)m/);
+                if (match) {
+                    return parseFloat(match[1]) / 1000; // Convert MB to GB equivalent
+                }
+            }
+
+            if (sizeStr.includes('b')) {
+                const match = sizeStr.match(/(\d+(?:\.\d+)?)b/);
+                if (match) {
+                    return parseFloat(match[1]);
+                }
+            }
+
+            // Handle mixture of experts like "8x7b" - use the second number
+            if (sizeStr.includes('x')) {
+                const parts = sizeStr.split('x');
+                if (parts.length === 2) {
+                    const secondPart = parts[1].toLowerCase();
+                    if (secondPart.includes('b')) {
+                        const match = secondPart.match(/(\d+(?:\.\d+)?)b/);
+                        if (match) {
+                            return parseFloat(match[1]);
+                        }
+                    }
+                }
+            }
+
+            return 0;
+        }
+
         // Function to load and process CSV data
         async function loadCSVData() {
             try {
@@ -484,17 +752,194 @@
 
         // Initialize both charts with CSV data
         async function initializeCharts() {
-            const data = await loadCSVData();
+            const [data, ollamaTableModels] = await Promise.all([
+                loadCSVData(),
+                loadOllamaModelsForTable()
+            ]);
+
             const chartElements = initializeChartElements(data.length);
 
             updateChart(data, 'arena', chartElements.svgArena, chartElements.xArena, chartElements.yArena,
                        chartElements.xAxisArena, chartElements.yAxisArena, chartElements.gridArena, chartElements.height);
             updateChart(data, 'voting', chartElements.svgVoting, chartElements.xVoting, chartElements.yVoting,
                        chartElements.xAxisVoting, chartElements.yAxisVoting, chartElements.gridVoting, chartElements.height);
+
+            // Populate the Ollama models table
+            populateOllamaTable(ollamaTableModels);
+        }
+
+        // Define mapping between Ollama models and LMArena models
+        const ollamaToArenaMapping = {
+            'Llama-3.1-8B': 'Meta-Llama-3.1-8B-Instruct',
+            'Llama-3.2-3B': 'Meta-Llama-3.2-3B-Instruct',
+            'Llama-3.2-1B': 'Meta-Llama-3.2-1B-Instruct',
+            'Mistral-7B': 'Mistral-7B-Instruct-v0.2',
+            'Gemma2-2B': 'Gemma-2-2b-it',
+            'Gemma-7B': 'Gemma-7B-it',
+            'Gemma-2B': 'Gemma-2B-it'
+        };
+
+        // Function to load and populate Ollama models table
+        async function loadOllamaModelsTable() {
+            try {
+                const response = await fetch('ollama-models.csv');
+                const csvText = await response.text();
+                const lines = csvText.trim().split('\n');
+                const ollamaData = [];
+
+                // Skip header and parse each line
+                lines.slice(1).forEach(line => {
+                    // Parse CSV line with proper handling of quoted fields
+                    const fields = [];
+                    let current = '';
+                    let inQuotes = false;
+
+                    for (let i = 0; i < line.length; i++) {
+                        const char = line[i];
+                        if (char === '"') {
+                            inQuotes = !inQuotes;
+                        } else if (char === ',' && !inQuotes) {
+                            fields.push(current.trim());
+                            current = '';
+                        } else {
+                            current += char;
+                        }
+                    }
+                    fields.push(current.trim()); // Add the last field
+
+                    if (fields.length >= 7) {
+                        ollamaData.push({
+                            model_name: fields[1], // model_name field
+                            categories: fields[4], // categories field
+                            size: fields[5], // size field
+                            pulls: fields[6] // pulls field
+                        });
+                    }
+                });
+
+                // Filter for models 8B and smaller
+                const smallModels = ollamaData.filter(model => {
+                    const size = model.size;
+                    if (!size) return false;
+
+                    // Convert size to comparable number
+                    const sizeNum = parseSizeToNumber(size);
+                    return sizeNum <= 8000; // 8B = 8000M
+                });
+
+                // Sort by pulls (largest to smallest), then alphabetically by model name
+                smallModels.sort((a, b) => {
+                    const pullsA = parsePullsToNumber(a.pulls);
+                    const pullsB = parsePullsToNumber(b.pulls);
+
+                    if (pullsA !== pullsB) {
+                        return pullsB - pullsA;
+                    }
+
+                    // Secondary sort by model name
+                    return a.model_name.localeCompare(b.model_name);
+                });
+
+                // Populate table
+                const tbody = document.getElementById('ollama-models-tbody');
+                tbody.innerHTML = '';
+
+                smallModels.forEach(model => {
+                    const row = document.createElement('tr');
+
+                    // Model name cell
+                    const modelCell = document.createElement('td');
+                    modelCell.textContent = model.model_name;
+
+                    // Highlight if this model matches Arena data
+                    if (ollamaToArenaMapping[model.model_name]) {
+                        modelCell.style.backgroundColor = '#fff9c4';
+                        modelCell.style.border = '1px solid #f9d71c';
+                        modelCell.style.borderRadius = '3px';
+                        modelCell.style.padding = '2px 4px';
+                        modelCell.title = `📊 Available in LMArena as: ${ollamaToArenaMapping[model.model_name]}`;
+                    }
+
+                    row.appendChild(modelCell);
+
+                    // Size cell
+                    const sizeCell = document.createElement('td');
+                    sizeCell.textContent = model.size;
+                    sizeCell.className = 'size-cell';
+                    row.appendChild(sizeCell);
+
+                    // Pulls cell
+                    const pullsCell = document.createElement('td');
+                    pullsCell.textContent = model.pulls || '';
+                    pullsCell.className = 'pulls-cell';
+                    pullsCell.style.textAlign = 'right';
+                    row.appendChild(pullsCell);
+
+                    // Categories cell
+                    const categoriesCell = document.createElement('td');
+                    categoriesCell.textContent = model.categories || '';
+                    categoriesCell.className = 'categories-cell';
+                    row.appendChild(categoriesCell);
+
+                    tbody.appendChild(row);
+                });
+
+            } catch (error) {
+                console.error('Error loading Ollama models:', error);
+                const tbody = document.getElementById('ollama-models-tbody');
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #666;">Error loading models data</td></tr>';
+            }
+        }
+
+        // Helper function to convert size strings to numbers for sorting
+        function parseSizeToNumber(sizeStr) {
+            if (!sizeStr) return 0;
+
+            const size = sizeStr.toLowerCase();
+
+            // Handle different size formats
+            if (size.includes('m')) {
+                return parseFloat(size.replace('m', ''));
+            } else if (size.includes('b')) {
+                return parseFloat(size.replace('b', '')) * 1000;
+            } else if (size.includes('k')) {
+                return parseFloat(size.replace('k', '')) / 1000;
+            } else if (size.includes('x')) {
+                // Handle MoE models like "8x7b" - use the second number
+                const parts = size.split('x');
+                if (parts.length === 2) {
+                    return parseFloat(parts[1].replace('b', '')) * 1000;
+                }
+            }
+
+            // Try to parse as number
+            const num = parseFloat(size);
+            return isNaN(num) ? 0 : num;
+        }
+
+        // Helper function to convert pulls strings to numbers for sorting
+        function parsePullsToNumber(pullsStr) {
+            if (!pullsStr) return 0;
+
+            const pulls = pullsStr.toLowerCase();
+
+            // Handle different pulls formats
+            if (pulls.includes('m')) {
+                return parseFloat(pulls.replace('m', '')) * 1000000;
+            } else if (pulls.includes('k')) {
+                return parseFloat(pulls.replace('k', '')) * 1000;
+            }
+
+            // Try to parse as number
+            const num = parseFloat(pulls);
+            return isNaN(num) ? 0 : num;
         }
 
         // Start the application when DOM is ready
-        document.addEventListener('DOMContentLoaded', initializeCharts);
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeCharts();
+            loadOllamaModelsTable();
+        });
 
     </script>
             <div style="text-align: center; margin-bottom: 10px; font-size: 14px; color: #666;">
