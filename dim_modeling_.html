@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn Dimensional Modeling</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.1/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-weight: 300;
+            letter-spacing: -0.5px;
+            margin: 10px 0 5px 0;
+        }
+        .learn-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+        
+        .step-section {
+            margin: 25px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .step-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: #3498db;
+            color: white;
+            border-radius: 50%;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .step-number.completed {
+            background: #27ae60;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .input-group input {
+            padding: 12px 15px;
+            font-size: 16px;
+            flex: 1;
+            min-width: 250px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus {
+            border-color: #3498db;
+        }
+        
+        .input-value {
+            padding: 12px 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-size: 16px;
+            color: #2c3e50;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .action-btn {
+            padding: 12px 25px;
+            font-size: 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .action-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .action-btn.success {
+            background-color: #27ae60;
+        }
+        
+        .action-btn.success:hover {
+            background-color: #219a52;
+        }
+        
+        .recommendation-list {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+        }
+        
+        .recommendation-item {
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .recommendation-item .icon {
+            font-size: 18px;
+            min-width: 24px;
+        }
+        
+        .recommendation-item .content {
+            flex: 1;
+        }
+        
+        .recommendation-item .name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .recommendation-item .reason {
+            font-size: 13px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        .definition-box {
+            padding: 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #27ae60;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #2c3e50;
+        }
+        
+        .definition-label {
+            font-weight: 600;
+            color: #27ae60;
+            margin-bottom: 5px;
+        }
+        
+        .explanation-box {
+            padding: 15px;
+            background: #e8f4f8;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #2c3e50;
+        }
+        
+        .grain-box {
+            padding: 12px;
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .grain-label {
+            font-weight: 600;
+            color: #856404;
+        }
+        
+        .results-section {
+            margin-top: 20px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* Star Schema Diagram Styles */
+        .dimension-box {
+            fill: #3498db;
+            stroke: #2980b9;
+            stroke-width: 3;
+        }
+        
+        .fact-box {
+            fill: #e74c3c;
+            stroke: #c0392b;
+            stroke-width: 3;
+        }
+        
+        .measure-box {
+            fill: #f39c12;
+            stroke: #d68910;
+            stroke-width: 2;
+        }
+        
+        .box-label {
+            font-size: 13px;
+            fill: white;
+            text-anchor: middle;
+            font-weight: bold;
+        }
+        
+        .measure-label {
+            font-size: 11px;
+            fill: white;
+            text-anchor: middle;
+            font-weight: bold;
+        }
+        
+        .schema-link {
+            stroke: #7f8c8d;
+            stroke-width: 2;
+            stroke-dasharray: 5,5;
+        }
+        
+        /* Pill button styles */
+        .pill-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        
+        .process-pill {
+            padding: 12px 20px;
+            font-size: 15px;
+            background-color: #fff;
+            color: #2c3e50;
+            border: 2px solid #3498db;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .process-pill:hover {
+            background-color: #3498db;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+        }
+        
+        .process-pill.selected {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .process-pill.warning {
+            border-color: #ffc107;
+        }
+        
+        .process-pill.warning:hover {
+            background-color: #ffc107;
+        }
+        
+        .process-pill.success {
+            border-color: #27ae60;
+        }
+        
+        .process-pill.success:hover {
+            background-color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div class="learn-container">
+        <h2>Dimensional Modeling</h2>
+        <p style="text-align: center; margin: 2px 0 10px 0; font-size: 16px; color: #666; font-style: italic;">
+            Use an interactive app to learn the "official" <a href="https://www.kimballgroup.com/data-warehouse-business-intelligence-resources/kimball-techniques/dimensional-modeling-techniques/" target="_blank">Kimball Group Dimensional Modeling Techniques and four step process</a>
+        </p>
+
+        <!-- Step 1: Select the Business Process -->
+        <div class="step-section" id="step1">
+            <div class="step-title">
+                <span class="step-number" id="step1Number">1</span>
+                Select the Business Process
+            </div>
+            <p style="margin: 10px 0; color: #666;">Business processes are the operational activities performed by your organization. Select a business process:</p>
+            <div class="pill-container" id="step1Pills">
+                <button class="process-pill" onclick="selectProcess('sales')">Sales</button>
+                <button class="process-pill" onclick="selectProcess('coffee sales')">Coffee Sales</button>
+                <button class="process-pill" onclick="selectProcess('coffee shipments')">Coffee shipments</button>
+            </div>
+            <!-- Explanation for too high level processes (Sales, Coffee Sales) -->
+            <div class="explanation-box hidden" id="processExplanationA">
+                <div class="explanation-label" style="font-weight: 600; color: #856404; margin-bottom: 5px;">⚠️ Process is too high level</div>
+                This process is too generic. A good business process should be a specific business event or transaction that happens at a specific point in time. Try selecting a more specific process.".
+            </div>
+            <!-- Explanation for good process (coffee shipments) -->
+            <div class="definition-box hidden" id="processExplanationB">
+                <div class="definition-label">Why "Coffee shipments" is a good business process to model</div>
+                A business process is the operational activities performed by your organization, such as taking an order or processing a shipment. 
+                "Coffee shipments" describes an actual operational activity that occurs in the business, rather than a general business area like "Sales" or "Subscriptions".
+            </div>
+        </div>
+        <div class="step-section" id="step2">
+            <div class="step-title">
+                <span class="step-number" id="step2Number">2</span>
+                Declare the Grain
+            </div>
+            <p style="margin: 10px 0; color: #666;">The grain establishes exactly what a single fact table row represents. Select a grain level:</p>
+            <div class="pill-container" id="step2Pills">
+                <button class="process-pill" onclick="selectGrain('Monthly summary per subscriber')">Monthly Summary per Subscriber</button>
+                <button class="process-pill" onclick="selectGrain('One row  per subscriber')">One row  per subscriber</button>
+                <button class="process-pill" onclick="selectGrain('One row per coffee product shipment per subscriber')">One row per coffee product shipment per subscriber</button>
+            </div>
+            <!-- Explanation for too high level grains (Monthly, Weekly) -->
+            <div class="explanation-box hidden" id="grainExplanationA">
+                <div class="explanation-label" style="font-weight: 600; color: #856404; margin-bottom: 5px;">⚠️ Grain is too high level</div>
+                This grain is at an aggregated level. For best analysis, consider using the lowest level of detail. This allows for more flexible analysis and drill-down.
+            </div>
+            <!-- Explanation for middle option (One row per subscriber) - also too high level -->
+            <div class="explanation-box hidden" id="grainExplanationC">
+                <div class="explanation-label" style="font-weight: 600; color: #856404; margin-bottom: 5px;">⚠️ Grain is too high level</div>
+                This grain is at an aggregated level. For best analysis, consider using the lowest level of detail. This allows for more flexible analysis and drill-down.
+            </div>
+            <!-- Explanation for good grain (One row per coffee product shipment per subscriber) -->
+            <div class="definition-box hidden" id="grainExplanationB">
+                <div class="definition-label">Why "One row per coffee product shipment per subscriber" is a good grain</div>
+                The grain statement gives the precise meaning of a single row in the fact table. This atomic grain captures each individual shipment line item, providing the most dimensional flexibility. Detailed atomic data can be constrained and rolled up in every possible way, but aggregated data cannot be disaggregated.
+            </div>
+        </div>
+
+        <!-- Step 3: Choose the Dimensions -->
+        <div class="step-section" id="step3">
+            <div class="step-title">
+                <span class="step-number" id="step3Number">3</span>
+                Choose the Dimensions
+            </div>
+            <div class="definition-box">
+                <div class="definition-label">What is a Dimension?</div>
+                Dimensions provide the context surrounding a business process event. They answer the who, what, where, when, why, and how questions. Dimensions contain descriptive attributes that enable filtering, grouping, and labeling of fact table rows.
+            </div>
+            <div class="explanation-box">
+                Based on your process and grain, here are the recommended dimensions following Kimball techniques:
+            </div>
+            <ul class="recommendation-list" id="dimensionsList"></ul>
+            <div style="margin-top: 15px;">
+                <button class="action-btn success" onclick="goToStep4()">Confirm Dimensions</button>
+            </div>
+        </div>
+
+        <!-- Step 4: Choose the Facts -->
+        <div class="step-section" id="step4">
+            <div class="step-title">
+                <span class="step-number" id="step4Number">4</span>
+                Choose the Facts
+            </div>
+            <div class="definition-box">
+                <div class="definition-label">What is a Fact?</div>
+                Facts are the measurements from the business process event. They are typically numeric and represent the metrics that the business analyzes. Facts can be additive (summarizable across all dimensions), semi-additive (summarizable across some dimensions), or non-additive (not summarizable).
+            </div>
+            <div class="explanation-box">
+                Based on your grain, here are the recommended facts (measures) - starting with the simplest facts:
+            </div>
+            <ul class="recommendation-list" id="factsList"></ul>
+            <div style="margin-top: 15px;">
+                <button class="action-btn success" id="agreeBtn" onclick="generateDiagram()">Confirm Facts</button>
+            </div>
+            <div class="results-section" id="diagramSection">
+                <div class="diagram-container" id="diagram"></div>
+                <div style="margin-top: 15px;" id="confirmStarSchemaBtn" class="hidden">
+                    <button class="action-btn success" onclick="generateMermaidDiagram()">Confirm Star Schema</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 5: Detailed ER Diagram -->
+        <div class="step-section hidden" id="step5">
+            <div class="step-title">
+                <span class="step-number" id="step5Number">5</span>
+                Detailed Entity-Relationship Diagram
+            </div>
+            <div class="definition-box">
+                This detailed ER diagram shows all attributes, primary keys (PK), and foreign keys (FK) for each table in the star schema.
+            </div>
+            <div class="mermaid-container" id="mermaidDiagram"></div>
+        </div>
+
+        <!-- Alternative Modeling Techniques -->
+        <div class="step-section hidden" id="alternativeSection">
+            <div class="step-title">
+                Alternative Modeling Techniques
+            </div>
+            <p style="margin: 10px 0; color: #666;">There are alternative data modeling techniques that do not use a star schema.</p>
+            <div class="definition-box">
+                <div class="definition-label">Conceptual Model</div>
+                Other techniques like Data Vault start with a conceptual model.A conceptual data model represents the business concepts and their relationships at a high level, independent of how the data will eventually be stored.
+            </div>
+            <div class="mermaid-container" id="conceptualDiagram"></div>
+            <div class="explanation-box" style="margin-top: 15px;">
+                <div class="explanation-label" style="font-weight: 600; color: #2980b9; margin-bottom: 5px;">📝 Note</div>
+                A conceptual data model isn't "normalized" or "denormalized" in the technical sense because it doesn't represent actual database tables yet. It represents the business concepts and their relationships at a high level, independent of how the data will eventually be stored. Data Vault uses conceptual modeling as its starting point.
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const margin = { top: 20, right: 60, bottom: 30, left: 60 };
+        const animationSpeed = 750;
+
+        // Calculate responsive width
+        function getChartWidth() {
+            const containerWidth = document.querySelector('.learn-container').clientWidth || 800;
+            return Math.max(600, containerWidth - margin.left - margin.right - 40);
+        }
+
+        // Dynamic height calculation based on number of models
+        function getChartHeight(dataLength) {
+            const boxHeight = 70;
+            const minHeight = 450;
+            return Math.max(minHeight, dataLength * boxHeight + 150);
+        }
+
+        // State
+        let currentProcess = '';
+        let currentGrain = '';
+        let currentDimensions = [];
+        let currentFacts = [];
+
+        // Handle Enter key press
+        function handleEnter(event, step) {
+            if (event.key === 'Enter') {
+                if (step === 'step1') goToStep2();
+                else if (step === 'step2') goToStep3();
+            }
+        }
+
+        // Select a process from the pills in Step 1
+        function selectProcess(process) {
+            currentProcess = process;
+            
+            // Check if process is the third pill (good process)
+            const isGoodProcess = (process === 'Coffee shipments');
+            
+            // Hide the pills
+            document.getElementById('step1Pills').classList.add('hidden');
+            
+            // Hide any existing explanations first
+            document.getElementById('processExplanationA').classList.add('hidden');
+            document.getElementById('processExplanationB').classList.add('hidden');
+            
+            // Check if process is too high level
+            const lowerProcess = process.toLowerCase();
+            const isTooHighLevel = (lowerProcess === 'sales' || lowerProcess === 'coffee sales');
+            
+            if (isTooHighLevel) {
+                // Show warning explanation (processExplanationA)
+                document.getElementById('processExplanationA').classList.remove('hidden');
+                // Do NOT mark step as completed - user needs to choose the correct process
+                // Do NOT scroll to step 2
+            } else {
+                // Show success explanation (processExplanationB)
+                document.getElementById('processExplanationB').classList.remove('hidden');
+                
+                // Mark step as completed
+                document.getElementById('step1Number').classList.add('completed');
+                
+                // Auto-scroll to step 2 ONLY when third pill is selected
+                setTimeout(() => {
+                    document.getElementById('step2').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 300);
+            }
+        }
+
+        // Select a grain from the pills in Step 2
+        function selectGrain(grain) {
+            currentGrain = grain;
+            
+            // Check if grain is the third pill (good grain)
+            const isGoodGrain = (grain === 'One row per coffee product shipment per subscriber');
+            
+            // Hide the pills
+            document.getElementById('step2Pills').classList.add('hidden');
+            
+            // Hide any existing explanations first
+            document.getElementById('grainExplanationA').classList.add('hidden');
+            document.getElementById('grainExplanationB').classList.add('hidden');
+            document.getElementById('grainExplanationC').classList.add('hidden');
+            
+            // Check if grain is too high level
+            const isGrainTooHigh = checkGrainLevel(grain);
+            
+            if (isGoodGrain) {
+                // Show success explanation (grainExplanationB)
+                document.getElementById('grainExplanationB').classList.remove('hidden');
+                
+                // Show and render the conceptual model
+                showConceptualModel();
+                
+            } else if (isGrainTooHigh) {
+                // Show warning explanation (grainExplanationA)
+                document.getElementById('grainExplanationA').classList.remove('hidden');
+            } else {
+                // For middle option (One row per subscriber) - show it's partially good but could be more detailed
+                document.getElementById('grainExplanationC').classList.remove('hidden');
+            }
+            
+            // Mark step as completed
+            document.getElementById('step2Number').classList.add('completed');
+            
+            // Analyze and generate recommendations
+            const analysis = analyzeProcessAndGrain(currentProcess, currentGrain);
+            currentDimensions = analysis.dimensions;
+            currentFacts = analysis.facts;
+            
+            // Display dimensions
+            displayDimensions(analysis);
+        }
+
+        // Go to Step 3
+        function goToStep3() {
+            // Analyze and generate recommendations
+            const analysis = analyzeProcessAndGrain(currentProcess, currentGrain);
+            currentDimensions = analysis.dimensions;
+            currentFacts = analysis.facts;
+            
+            // Display dimensions
+            displayDimensions(analysis);
+        }
+
+        // Check if grain is too high level
+        function checkGrainLevel(grain) {
+            const lowerGrain = grain.toLowerCase();
+            const highLevelIndicators = ['month', 'year', 'week', 'quarter', 'annual', 'yearly', 'monthly', 'weekly'];
+            return highLevelIndicators.some(indicator => lowerGrain.includes(indicator));
+        }
+
+        // Show the conceptual model (normalized source data structure)
+        function showConceptualModel() {
+            // Show the alternative section at the bottom
+            const alternativeSection = document.getElementById('alternativeSection');
+            alternativeSection.classList.remove('hidden');
+            
+            // Initialize Mermaid
+            mermaid.initialize({ 
+                startOnLoad: false,
+                theme: 'default',
+                er: {
+                    useMaxWidth: true
+                }
+            });
+            
+            // Conceptual model Mermaid ER diagram - normalized source structure
+            const conceptualCode = `erDiagram
+    SUBSCRIBER ||--o{ COFFEE_SUBSCRIPTION : "holds"
+    COFFEE_SUBSCRIPTION ||--o{ COFFEE_SHIPMENT : "triggers"
+    COFFEE_SHIPMENT ||--|{ COFFEE_PRODUCT : "contains"
+
+    SUBSCRIBER {
+
+    }
+
+    COFFEE_SUBSCRIPTION {
+
+    }
+
+    COFFEE_SHIPMENT {
+
+    }
+
+    COFFEE_PRODUCT {
+
+    }`;
+            
+            // Render the Mermaid diagram
+            const conceptualDiv = document.getElementById('conceptualDiagram');
+            conceptualDiv.innerHTML = `<pre class="mermaid">${conceptualCode}</pre>`;
+            
+            // Render the diagram
+            mermaid.run();
+        }
+
+        // Go to Step 4
+        function goToStep4() {
+            // Mark step as completed
+            document.getElementById('step3Number').classList.add('completed');
+            
+            // Display facts
+            displayFacts({ facts: currentFacts });
+            
+            // Scroll to step 4
+            setTimeout(() => {
+                document.getElementById('step4').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+
+        // Analyze process and grain to generate recommendations
+        function analyzeProcessAndGrain(process, grain) {
+            const lowerProcess = process.toLowerCase();
+            
+            // Check if this is the coffee shipments process
+            if (lowerProcess.includes('coffee') && lowerProcess.includes('shipment') && lowerProcess.includes('subscriber')) {
+                // Specific dimensions for coffee shipments - Star Schema
+                const dimensionRecommendations = [
+                    { name: 'Subscriber', reason: 'Subscriber_Key, First_Name, Last_Name, City, State, Post_Code, Current_Status - for customer analysis' },
+                    { name: 'Product', reason: 'Product_Key, Product_Name, Roast_Type, Origin_Region, Bag_Size_Grams - for product analysis' },
+                    { name: 'Plan', reason: 'Plan_Key, Plan_Name (Starter, Pro), Frequency (Weekly, Fortnightly, Monthly) - for plan analysis' }
+                ];
+                
+                // Specific facts for coffee shipments - Star Schema
+                const factRecommendations = [
+                    { name: 'Subscriber_Key', reason: 'Foreign key to Subscriber dimension' },
+                    { name: 'Product_Key', reason: 'Foreign key to Product dimension' },
+                    { name: 'Plan_Key', reason: 'Foreign key to Plan dimension' },
+                    { name: 'Quantity', reason: 'Number of bags shipped - fully additive across all dimensions' },
+                    { name: 'Sales_Price', reason: 'Price of the product - fully additive' },
+                    { name: 'Shipping_Cost', reason: 'Cost to deliver the shipment - fully additive' },
+                    { name: 'Discount_Amount', reason: 'Any discount applied - fully additive' },
+                    { name: 'Net_Revenue', reason: 'Sales_Price minus Shipping_Cost minus Discount_Amount - fully additive' }
+                ];
+                
+                return { process, grain, dimensions: dimensionRecommendations, facts: factRecommendations };
+            }
+            
+            // Default recommendations
+            const dimensionRecommendations = [];
+            dimensionRecommendations.push({ name: 'Subscriber', reason: '' });
+            
+            if (grain.toLowerCase().includes('product') || grain.toLowerCase().includes('item') || grain.toLowerCase().includes('coffee') || lowerProcess.includes('product')) {
+                dimensionRecommendations.push({ name: 'Product', reason: '' });
+            }
+            
+            if (grain.toLowerCase().includes('subscriber') || lowerProcess.includes('subscription') || lowerProcess.includes('plan')) {
+                dimensionRecommendations.push({ name: 'Plan', reason: '' });
+            }
+            
+            const factRecommendations = [];
+            factRecommendations.push({ name: 'Shipments', reason: 'Shipment events - fully additive across all dimensions.' });
+            
+            if (lowerProcess.includes('sale') || lowerProcess.includes('revenue') || lowerProcess.includes('payment') || lowerProcess.includes('subscription') || lowerProcess.includes('order')) {
+                factRecommendations.push({ name: 'Total Amount', reason: 'Total monetary value - fully additive across all dimensions' });
+            }
+            
+            return { process, grain, dimensions: dimensionRecommendations, facts: factRecommendations };
+        }
+
+        // Display recommended dimensions
+        function displayDimensions(analysis) {
+            const list = document.getElementById('dimensionsList');
+            list.innerHTML = analysis.dimensions.map((dim, i) => `
+                <li class="recommendation-item">
+                    <span class="icon">📊</span>
+                    <div class="content">
+                        <div class="name">${dim.name}</div>
+                        <div class="reason">${dim.reason}</div>
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        // Display recommended facts
+        function displayFacts(analysis) {
+            const list = document.getElementById('factsList');
+            list.innerHTML = analysis.facts.map((fact, i) => `
+                <li class="recommendation-item">
+                    <span class="icon">📈</span>
+                    <div class="content">
+                        <div class="name">${fact.name}</div>
+                        <div class="reason">${fact.reason}</div>
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        // Generate the star schema diagram using D3.js with colorful boxes
+        function generateDiagram() {
+            // Scroll to diagram section first
+            document.getElementById('diagramSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // Wait for scroll to complete then generate diagram
+            setTimeout(() => {
+                const width = getChartWidth();
+                const height = 500;
+                
+                const diagramDiv = document.getElementById('diagram');
+                diagramDiv.innerHTML = '';
+                
+                // Create SVG
+                const svg = d3.select('#diagram')
+                    .append('svg')
+                    .attr('width', width + margin.left + margin.right)
+                    .attr('height', height + margin.top + margin.bottom)
+                    .append('g')
+                    .attr('transform', `translate(${margin.left},${margin.top})`);
+                
+                // Box dimensions
+                const boxWidth = 140;
+                const boxHeight = 45;
+                const factBoxWidth = 180;
+                const factBoxHeight = 60;
+                
+                // Center position for fact table
+                const centerX = width / 2;
+                const centerY = height / 2;
+                
+                // Dimension positions in star pattern (top, right, bottom)
+                const dimensionPositions = [
+                    { x: centerX - boxWidth / 2, y: 30 },                    // Top - Subscriber
+                    { x: width - boxWidth - 20, y: centerY - boxHeight / 2 }, // Right - Product
+                    { x: centerX - boxWidth / 2, y: height - boxHeight - 30 } // Bottom - Plan
+                ];
+                
+                // Fact table position (center)
+                const factBoxX = centerX - factBoxWidth / 2;
+                const factBoxY = centerY - factBoxHeight / 2;
+                
+                // Draw connecting lines from dimensions to fact table
+                currentDimensions.forEach((dim, i) => {
+                    if (i < dimensionPositions.length) {
+                        const pos = dimensionPositions[i];
+                        let lineStartX, lineStartY, lineEndX, lineEndY;
+                        
+                        // Calculate line endpoints based on dimension position
+                        if (i === 0) { // Top
+                            lineStartX = pos.x + boxWidth / 2;
+                            lineStartY = pos.y + boxHeight;
+                            lineEndX = centerX;
+                            lineEndY = factBoxY;
+                        } else if (i === 1) { // Right
+                            lineStartX = pos.x;
+                            lineStartY = pos.y + boxHeight / 2;
+                            lineEndX = factBoxX + factBoxWidth;
+                            lineEndY = centerY;
+                        } else if (i === 2) { // Bottom
+                            lineStartX = pos.x + boxWidth / 2;
+                            lineStartY = pos.y;
+                            lineEndX = centerX;
+                            lineEndY = factBoxY + factBoxHeight;
+                        } else { // Left
+                            lineStartX = pos.x + boxWidth;
+                            lineStartY = pos.y + boxHeight / 2;
+                            lineEndX = factBoxX;
+                            lineEndY = centerY;
+                        }
+                        
+                        svg.append('line')
+                            .attr('x1', lineStartX)
+                            .attr('y1', lineStartY)
+                            .attr('x2', lineEndX)
+                            .attr('y2', lineEndY)
+                            .attr('stroke', '#7f8c8d')
+                            .attr('stroke-width', 2)
+                            .attr('stroke-dasharray', '5,5');
+                    }
+                });
+                
+                // Draw fact table in center
+                const factBox = svg.append('g')
+                    .attr('transform', `translate(${factBoxX}, ${factBoxY})`);
+                
+                factBox.append('rect')
+                    .attr('class', 'fact-box')
+                    .attr('width', factBoxWidth)
+                    .attr('height', factBoxHeight)
+                    .attr('rx', 8)
+                    .attr('ry', 8)
+                    .attr('fill', '#e74c3c')
+                    .attr('stroke', '#c0392b')
+                    .attr('stroke-width', 3);
+                
+                factBox.append('text')
+                    .attr('x', factBoxWidth / 2)
+                    .attr('y', factBoxHeight / 2 + 5)
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', 'white')
+                    .attr('font-size', '13px')
+                    .attr('font-weight', 'bold')
+                    .text('FACT_SHIPMENT');
+                
+                // Add heading
+                svg.append('text')
+                    .attr('x', centerX)
+                    .attr('y', -5)
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', '#2c3e50')
+                    .attr('font-size', '18px')
+                    .attr('font-weight', 'bold')
+                    .text('Star Schema Diagram');
+                
+                // Kimball naming convention for dimension table names
+                const dimNames = ['DIM_SUBSCRIBER', 'DIM_PRODUCT', 'DIM_PLAN'];
+                
+                // Draw dimension boxes in star pattern
+                currentDimensions.forEach((dim, i) => {
+                    if (i < dimensionPositions.length) {
+                        const pos = dimensionPositions[i];
+                        
+                        const dimBox = svg.append('g')
+                            .attr('transform', `translate(${pos.x}, ${pos.y})`);
+                        
+                        dimBox.append('rect')
+                            .attr('width', boxWidth)
+                            .attr('height', boxHeight)
+                            .attr('rx', 8)
+                            .attr('ry', 8)
+                            .attr('fill', '#3498db')
+                            .attr('stroke', '#2980b9')
+                            .attr('stroke-width', 3);
+                        
+                        dimBox.append('text')
+                            .attr('x', boxWidth / 2)
+                            .attr('y', boxHeight / 2 + 5)
+                            .attr('text-anchor', 'middle')
+                            .attr('fill', 'white')
+                            .attr('font-size', '13px')
+                            .attr('font-weight', 'bold')
+                            .text(dimNames[i]);
+                    }
+                });
+                
+                // Show the confirm button
+                document.getElementById('confirmStarSchemaBtn').classList.remove('hidden');
+            }, 100);
+        }
+
+        // Generate the detailed Mermaid ER diagram
+        function generateMermaidDiagram() {
+            // Mark step 4 as completed
+            document.getElementById('step4Number').classList.add('completed');
+            
+            // Show step 5
+            const step5 = document.getElementById('step5');
+            step5.classList.remove('hidden');
+            
+            // Scroll to step 5
+            setTimeout(() => {
+                step5.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+            
+            // Initialize Mermaid
+            mermaid.initialize({ 
+                startOnLoad: false,
+                theme: 'default',
+                er: {
+                    useMaxWidth: true
+                }
+            });
+            
+            // Mermaid ER diagram definition
+            const mermaidCode = `erDiagram
+    FACT_SHIPMENT {
+        int ShipmentLineKey PK
+        int SubscriberKey FK
+        int ProductKey FK
+        int SubscriptionPlanKey FK
+        date ShipmentDate
+        string ShipmentID
+        float QuantityOrdered
+        float TotalPrice
+        float ShippingCost
+    }
+    DIM_SUBSCRIBER {
+        int SubscriberKey PK
+        string SubscriberID
+        string Name
+        string Email
+        string SubscriptionStatus
+        string City
+        string State
+        string Country
+        string PostalCode
+    }
+    DIM_PRODUCT {
+        int ProductKey PK
+        string ProductID
+        string ProductName
+        string RoastType
+        string Region
+        string CoffeeType
+    }
+    DIM_PLAN {
+        int SubscriptionPlanKey PK
+        string PlanName
+        string Frequency
+        float Price
+    }
+
+    FACT_SHIPMENT }o--|| DIM_SUBSCRIBER : "sent to"
+    FACT_SHIPMENT }o--|| DIM_PRODUCT : "contains"
+    FACT_SHIPMENT }o--|| DIM_PLAN : "based on"`;
+            
+            // Render the Mermaid diagram
+            const mermaidDiv = document.getElementById('mermaidDiagram');
+            mermaidDiv.innerHTML = `<pre class="mermaid">${mermaidCode}</pre>`;
+            
+            // Mark step 5 as completed
+            document.getElementById('step5Number').classList.add('completed');
+            
+            // Render the diagram
+            mermaid.run();
+        }
+    </script>
+</body>
+</html>
