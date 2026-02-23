@@ -622,24 +622,19 @@
             const lowerProcess = process.toLowerCase();
             
             // Check if this is the coffee shipments process
-            if (lowerProcess.includes('coffee') && lowerProcess.includes('shipment') && lowerProcess.includes('subscriber')) {
+            if (lowerProcess.includes('coffee') && lowerProcess.includes('shipment')) {
                 // Specific dimensions for coffee shipments - Star Schema
                 const dimensionRecommendations = [
-                    { name: 'Subscriber', reason: 'Subscriber_Key, First_Name, Last_Name, City, State, Post_Code, Current_Status - for customer analysis' },
-                    { name: 'Product', reason: 'Product_Key, Product_Name, Roast_Type, Origin_Region, Bag_Size_Grams - for product analysis' },
-                    { name: 'Plan', reason: 'Plan_Key, Plan_Name (Starter, Pro), Frequency (Weekly, Fortnightly, Monthly) - for plan analysis' }
+                    { name: 'Date', reason: 'Date of the shipment' },
+                    { name: 'Subscriber', reason: 'Subscribed customer details' },
+                    { name: 'Product', reason: 'Coffee Product details' },
+                    { name: 'Plan', reason: 'Coffee Subscription Plan details' }
                 ];
                 
                 // Specific facts for coffee shipments - Star Schema
                 const factRecommendations = [
-                    { name: 'Subscriber_Key', reason: 'Foreign key to Subscriber dimension' },
-                    { name: 'Product_Key', reason: 'Foreign key to Product dimension' },
-                    { name: 'Plan_Key', reason: 'Foreign key to Plan dimension' },
-                    { name: 'Quantity', reason: 'Number of bags shipped - fully additive across all dimensions' },
-                    { name: 'Sales_Price', reason: 'Price of the product - fully additive' },
-                    { name: 'Shipping_Cost', reason: 'Cost to deliver the shipment - fully additive' },
-                    { name: 'Discount_Amount', reason: 'Any discount applied - fully additive' },
-                    { name: 'Net_Revenue', reason: 'Sales_Price minus Shipping_Cost minus Discount_Amount - fully additive' }
+                    { name: 'Shipments', reason: 'Shipment events - fully additive across all dimensions.' },
+
                 ];
                 
                 return { process, grain, dimensions: dimensionRecommendations, facts: factRecommendations };
@@ -655,6 +650,10 @@
             
             if (grain.toLowerCase().includes('subscriber') || lowerProcess.includes('subscription') || lowerProcess.includes('plan')) {
                 dimensionRecommendations.push({ name: 'Plan', reason: '' });
+            }
+
+            if (grain.toLowerCase().includes('date') || grain.toLowerCase().includes('time') || grain.toLowerCase().includes('year') || grain.toLowerCase().includes('month') || grain.toLowerCase().includes('week') || grain.toLowerCase().includes('day')) {
+                dimensionRecommendations.push({ name: 'Date', reason: '' });
             }
             
             const factRecommendations = [];
@@ -811,7 +810,7 @@
                     .text('Star Schema Diagram');
                 
                 // Kimball naming convention for dimension table names
-                const dimNames = ['DIM_SUBSCRIBER', 'DIM_PRODUCT', 'DIM_PLAN'];
+                const dimNames = ['DIM_SUBSCRIBER', 'DIM_PRODUCT', 'DIM_PLAN','DIM_DATE'];
                 
                 // Draw dimension boxes in star pattern
                 currentDimensions.forEach((dim, i) => {

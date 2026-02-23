@@ -21,6 +21,9 @@ I wanted to find a quick way to chose the best free to use Ollama model to downl
 As per [Ollama's docs:](https://github.com/ollama/ollama?tab=readme-ov-file)
 > You should have at least 8 GB of RAM available to run the 7B models, 16 GB to run the 13B models, and 32 GB to run the 33B models.
 
+- [Dimensional Modeling](https://kimnewzealand.github.io/apps/dim-modeling-app.html) 
+
+Use an interactive app to learn the "official" Kimball Group Dimensional Modeling Techniques and four step process
 
 ## Adding New Apps
 
